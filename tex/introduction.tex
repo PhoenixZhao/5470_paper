@@ -1,0 +1,37 @@
+
+\section{Introduction}
+% no \IEEEPARstart
+Nowadays we are in the era of big data with the development of all kinds of web services. However, it brings about an increasing problem-information overload, which makes it difficult for us to obtain the information we need.For example, according to \cite{stats_url} in just one minute, YouTube users upload 300 hours of new video, Facebook users like 4,166,667 posts, Instagram users like 1,736,111 photos, Snapchat users share 284,722 snaps, and Pinterest sees 9,722 users Pin images. Under this condition, it's very likely for us to get overwhelmed by the flood of information.To address this problem, people both in academia and industry seek for the help of Recommendation System(RS), which is a technique of information filter, aiming at providing users with items(movies, books, music, news, Web pages, etc) based on their interests. Due to its huge commercial value, RS has been successfully in industry,such as product recommendation at Amazon and movie recommendation at Netflix, etc. 
+
+Collaborative Filtering (CF), one popular method for RS, tries to predict users' ratings in unseen items by collecting their rating information from other similar users or items. The underlying assumption of CF is that people will be fond of the items that are similar to those they liked in the past, or that similar users prefer. Generally, CF are roughly categorized into memory-based and model-based methods. Memory-based methods mainly utilize the neighborhood information of users or items in the user-item rating matrix while model-based methods try to use techniques in Machine Learning, Data Mining to discovery the latent factors that affect the rating. Despite the simplicity of memory-based methods, the model-based methods have better predicting performance. And among the various model-based methods, matrix factorization(MF) has become one of the most popular ones in recent years, due to its good performance and scalability in large datasets. \cite{koren2009matrix}\cite{mnih2007probabilistic}.
+
+MF mainly deals with the rating prediction task in RS. For example, at Netflix, a typical user will give a rating(from 1 to 5) to a movie after watching. Then Netflix will predict the rating a user will give to an unseen movie according to his or her rating history. The process is done in the user-item matrix  $R \in \mathbb{R}^{m \times n}$, where $m$ represents the number of users and $n$ represents the number of items. Based on an assumption that a user's rating is governed by a small amount of latent factors, the rating matrix $R$ can be approximated by a multiplication of l-rank factors,
+\begin{equation}
+R \approx U^TV,
+\end{equation}
+where $U \in \mathbb{R}^{l \times m}$ and {$U \in \mathbb{R}^{l \times m}$} with $l < min(m, n)$, representing latent feature of items and users' preference, respectively. Traditionally, The Singular Value Decomposition (SVD) method is utilized to approximate a rating matrix $R$ by minimizing
+\begin{equation}
+\frac{1}{2}||R - U^TV||_F^2,
+\end{equation}
+where $||\cdot||_F^2$ denotes the Frobenius norm. However, due to the fact that R contains a large number of missing values, we only need to factorize the observed ratings in matrix R. Hence, we change Equation (2) to
+\begin{equation}
+\min_{U,V}\frac{1}{2}\sum_{i=1}^{m}\sum_{j=1}^{n}I_{ij}(R_{ij} - U_i^TV_j)^2,
+\end{equation} 
+where $I_{ij}$ is the indicator function that is equal to 1 if user $u_i$ rated item $v_j$ or equal to 0 otherwise. In order to avoid overfiting, two regularization terms are added into Equation (3). Hence we have
+\begin{equation}
+\min_{U,V}\frac{1}{2}\sum_{i=1}^{m}\sum_{j=1}^{n}I_{ij}(R_{ij} - U_i^TV_j)^2 + \frac{\lambda_1}{2}||U||_F^2 + \frac{\lambda_2}{2}||V||_F^2,
+\end{equation} 
+where $\lambda_1, \lambda_2 > 0 $.This optimization problem in Equation (4) minimizes the sum-of-squared-errors objective function with quadratic regularization terms, which can be solved by a gradient descent method. After getting $U$ and $V$, then the missing value in the rating matrix $R$ can be predicted in the following:
+\begin{equation}
+R_{ij} = U_i^TV_j,
+\end{equation}
+in which, $R_{ij}$ represents the rating to the item $v_j$ given by the user $u_i$, and $U_i$ and $V_i$ represent the corresponding latent factors, respectively.
+
+Despite the good performance of MF, there are two main challenges facing it. The first one is called cold start, which is caused by new items without any ratings or users without any behaviors, thus it is difficult to predict the latent factors. 
+The second one is the sparsity, since most users only rate a small amount of items thus making the rating matrix very sparse.
+
+To address these two problems, one popular approach is to integrate side information into the MF framework. Recently, based on the intuition that users' ratings can be influenced by his friends or people he trusts in social network, a few social-aware or trust-aware recommendation methods have been proposed in \cite{jamali2010matrix}\cite{ma2009llearningEnsembel}\cite{ma2009learningTrust}\cite{ma2008sorec}\cite{ma2011recommender}\cite{massa2004trust}\cite{yang2013social}. More specially, when a user is rating, he may align with his friends or people he trust. Thus, in order to model this, \cite{jamali2010matrix}\cite{ma2009llearningEnsembel}\cite{ma2009learningTrust}\cite{ma2008sorec}\cite{ma2011recommender}\cite{massa2004trust} firstly try to quantify the value of social or trust, and then integrating them into the MF framework by adding regularizations. The new objective function then become
+\begin{equation}
+\min_{U,V}\frac{1}{2}\sum_{i=1}^{m}\sum_{j=1}^{n}I_{ij}(R_{ij} - U_i^TV_j)^2 + \frac{\beta}{2}\sum_{i=1}^{m}\sum_{f \in \phi(U_i)}\gamma(U_i, U_f)||U_i - U_f||_F^2 + \frac{\lambda_1}{2}||U||_F^2 + \frac{\lambda_2}{2}||V||_F^2,
+\end{equation} 
+where $\phi(U_i)$ represents the set of users that user $u_i$ trust or have connections, $\gamma(U_i,U_f)$ is a function that measures the intensity of the trust or connections between two users. The regularization term $\frac{\beta}{2}\sum_{i=1}^{m}\sum_{f \in \phi(U_i)}\gamma(U_i, U_f)||U_i - U_f||_F^2$ can be explained by the fact that a user's rating should be close to people he trusts or have connections.
