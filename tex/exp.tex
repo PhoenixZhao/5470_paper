@@ -1,14 +1,17 @@
 \section{EXPERIMENTS}
 In this section, I elaborate the details of the experiments and compare my model to several existing approaches in a real large dataset.
 \subsection{Dataset}
-I use a real large datasets: MovieLens(100K). MovieLens\footnote{http://grouplens.org/datasets/movielens/} is a famous web-based research recommendation system, which is maintained by the Grouplens Research team at the University of Minnesota. And the MovieLens datasets are collected by the research team, one of which is the MovieLens(100K). The MovieLens(100K) contains 100,000 ratings(1-5 scales) rated by 943 users on 1682 movies, and each user at least rated 20 movies. The density of the user-item matrix is :
+The experiment is conducted in a real large dataset: MovieLens(100K). MovieLens\footnote{http://grouplens.org/datasets/movielens/} is a famous web-based research recommendation system, which is maintained by the Grouplens Research team at the University of Minnesota. And the MovieLens datasets are collected by the research team, one of which is the MovieLens(100K). The MovieLens(100K) contains 100,000 ratings(1-5 scales) rated by 943 users on 1682 movies, and each user at least rated 20 movies. The density of the user-item matrix is :
 \begin{align*}
 	\frac{100000}{943 \times 1682} = 6.30\%,
 \end{align*}
-Besides, it also contains attributes of the movies, including titles. \textcolor{red}{Then I crawled the descriptions of every movie from IMDB A typical example of the attributes of a movie is as follows:
-}
 
-The statistics of dataset MovieLens(100K) is summarized in table \ref{stats}.
+The statistics of dataset MovieLens(100K) is summarized in table \ref{stats}. Besides, it also contains movie genre and titles. To increase the text information of very movie, a webpage crawler is employed to obtain the description of every movie from IMDB\footnote{http://www.imdb.com/}, which is a very famous movie website. For example, the description of the latest popular movie \textit{Forrest Gump}
+is as follows:
+
+\textit{Forrest Gump is a simple man with a low I.Q. but good intentions. He is running through childhood with his best and only friend Jenny. His 'mama' teaches him the ways of life and leaves him to choose his destiny. Forrest joins the army for service in Vietnam, finding new friends called Dan and Bubba, he wins medals, creates a famous shrimp fishing fleet, inspires people to jog, starts a ping-pong craze, create the smiley, write bumper stickers and songs, donating to people and meeting the president several times. However, this is all irrelevant to Forrest who can only think of his childhood sweetheart Jenny Curran. Who has messed up her life. Although in the end all he wants to prove is that anyone can love anyone.}
+
+Then LDA model is executed in the text of information including title, genre, and the description, after which we can cluster the movies into different clusters, i.e. domains.
 \begin{table}[]
 	\centering
 	\caption{Statistics of Dataset MovieLens(100K)}
@@ -33,9 +36,6 @@ where $\mathcal{R}_{test}$ is the set of all user\-item pairs (u,v) in the test 
 RMSE = \sqrt{\frac{\sum_{(u,v) \in \mathcal{R}_{test}}{(R_{u,v} - \hat{R}_{u,v})^2}}{|\mathcal{R}_{test}|}}.
 \end{equation}
 \subsection{Evaluation}
-
-\textcolor{red}{LDA process needed explaining}
-
 In order to demonstrate the effectiveness of the proposed IDSR model, I compare the recommendation result with several baselines in the following:
 \begin{itemize}
 	\item \textbf{GlobalAVG}: it uses the average of the ratings of all the observed items as predictions.
@@ -49,39 +49,39 @@ In order to demonstrate the effectiveness of the proposed IDSR model, I compare 
 
 The reason why I don't choose recent work which integrate the social factor into matrix factorization framework \cite{jamali2010matrix}\cite{ma2008sorec}\cite{ma2009learningTrust}\cite{yang2012circle}\cite{yang2013social} is that they all require explicit connections between users like following in twitter or trust in Epinion\footnote{https://snap.stanford.edu/data/soc-Epinions1.html}
 
-\textcolor{red}{how about conduct work in yelp or epinion dataset with explicit category information, to show implicit not that good as explicit category??like ma hao did in 2013.}
 \subsection{Comparisons}
 The MAE and RMSE results are showed in table \ref{rmse&mael}
 \begin{table}[]
 	\centering
-	\caption{Performance Comparisons (Dimensionality has no effect on the \bf GlobalAVG,UserAVG, ItemAVG)}
+	\caption{Comparisons}
 	\label{rmse&mael}
 	\begin{tabular}{|c|c|c|c|c|}
 		\hline
 		\multicolumn{1}{|l|}{} & \multicolumn{2}{c|}{d=5} & \multicolumn{2}{c|}{d=10} \\ \hline
 		\multicolumn{1}{|l|}{} & MAE(improve) & RMSE(improve) & MAE(improve) & RMSE(improve) \\ \hline
-		\textbf{GlobalAVG} & 0.945(23.92\%) & 1.126(19.36\%) & 0.945(24.76\%) & 1.126(18.92\%) \\ \hline
-		\textbf{UserAVG} & 0.835(13.89\%) & 1.042(12.86\%) & 0.835(14.85\%) & 1.042(12.38\%) \\ \hline
-		\textbf{ItemAVG} & 0.817(12.00\%) & 1.025(11.41\%) & 0.817(12.97\%) & 1.025(10.93\%) \\ \hline
-		\textbf{NMF} & 0.727(1.10\%) & 0.92(1.30\%) & 0.736(3.40\%) & 0.945(3.39\%) \\ \hline
-		\textbf{PMF} & 0.747(3.75\%) & 0.926(1.94\%) & 0.715(0.56\%) & 0.919(0.65\%) \\ \hline
-		\textbf{IDSR} & \textbf{0.719} & \textbf{0.908} & \textbf{0.711} & \textbf{0.913} \\ \hline
+		\textbf{GlobalAVG} & 0.945(23.28\%) & 1.126(18.38\%) & 0.945(24.76\%) & 1.126(18.92\%) \\ \hline
+		\textbf{UserAVG} & \textbf{0.835(13.17\%)} & 1.042(11.80\%) & 0.835(14.85\%) & 1.042(12.38\%) \\ \hline
+		\textbf{ItemAVG} & 0.817(11.26\%) & 1.025(10.34\%) & 0.817(12.97\%) & 1.025(10.93\%) \\ \hline
+		\textbf{NMF} & 0.727(0.28\%) & 0.92(0.11\%) & 0.736(3.40\%) & 0.945(3.39\%) \\ \hline
+		\textbf{PMF} & 0.747(2.95\%) & 0.926(0.76\%) & 0.715(0.56\%) & 0.919(0.65\%) \\ \hline
+		\textbf{IDSR} & \textbf{0.725} & \textbf{0.919} & \textbf{0.711} & \textbf{0.913} \\ \hline
 	\end{tabular}
 \end{table}
 
-\textcolor{red}{The topic number K is also very important, must be elaborated here.}
 For \textbf{GlobalAVG,UserAVG, ItemAVG}, they have no extra parameters, including the dimensionality, thus we just keep the rmse\&mae the same in different dimensionality for the convenience of comparison. For \textbf{PMF} and my \textbf{IDSR}, the $\lambda_1$ and $\lambda_2$ are set to 0.001 as previous work did. And the regularization parameter $\beta$ is very important, which control how much my method should incorporate the information of the trust network. The larger value of $\beta$ is chosen, the more influence will the trust network will exert on the recommendation process. The detail of this change is given in the following. And $\beta$ is set to 0.01 here for its good performance.
+
+Another parameter is the number of topic number in the clustering process. For the result reported, we set it to 30 for its good performance too.
 
 From the result in the table \ref{rmse&mael}, we can see that my method outperform other baseline models consistently, demonstrating the effectiveness of integrating the implicit trust information between users.
 
 \subsection{Impact of the number K of domains and regularization $\beta$}
-As mentioned in the above section, the parameter $K$ and $\beta$ are very important. $K$ controls how many domains we choose when clustering the items, while $\beta$ decide how much influence the trust will exert on recommendation process. In this section, I analyze the changes of $K$ and $\beta$ can affect the final recommendation accuracy.
+As mentioned in the above section, the parameter $K$ and $\beta$ are very important. $K$ controls how many topics (i.e.domains) we choose when clustering the items, while $\beta$ decide how much influence the trust will exert on recommendation process. In this section, I analyze the changes of $K$ and $\beta$ can affect the final recommendation accuracy.
 
 \begin{figure}[h]
 	\caption{Impact of $\beta$}
 	\label{fig:beta}
 	%\centering
-	\includegraphics[width=8cm]{beta_rmse}
+	\includegraphics[width=8cm]{beta_mae}
 	\includegraphics[width=8cm]{beta_rmse}
 \end{figure}
 
@@ -92,7 +92,7 @@ The analysis of $K$ is very similar to $\beta$, which shows that $K$ cannot be t
 	\caption{Impact of $K$}
 	\label{fig:k}
 	%\centering
-	\includegraphics[width=8cm]{k_rmse}
-	\includegraphics[width=8cm]{k_rmse}
+	\includegraphics[width=8cm]{K_mae}
+	\includegraphics[width=8cm]{K_rmse}
 \end{figure}
 
