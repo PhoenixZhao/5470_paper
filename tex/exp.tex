@@ -11,7 +11,7 @@ is as follows:
 
 \textit{Forrest Gump is a simple man with a low I.Q. but good intentions. He is running through childhood with his best and only friend Jenny. His 'mama' teaches him the ways of life and leaves him to choose his destiny. Forrest joins the army for service in Vietnam, finding new friends called Dan and Bubba, he wins medals, creates a famous shrimp fishing fleet, inspires people to jog, starts a ping-pong craze, create the smiley, write bumper stickers and songs, donating to people and meeting the president several times. However, this is all irrelevant to Forrest who can only think of his childhood sweetheart Jenny Curran. Who has messed up her life. Although in the end all he wants to prove is that anyone can love anyone.}
 
-Then LDA model is executed in the text of information including title, genre, and the description, after which we can cluster the movies into different clusters, i.e. domains.
+Then LDA model is executed in the text of information including title, genre, and the description, after which we can cluster the movies into different groups, i.e. \textit{domains}.
 \begin{table}[]
 	\centering
 	\caption{Statistics of Dataset MovieLens(100K)}
@@ -26,7 +26,7 @@ Then LDA model is executed in the text of information including title, genre, an
 \end{table}
 
 \subsection{Performance Measures}
-I perform 5-fold cross validation in the experiments. In each fold, 80\% of the data are used as training data and the rest as test data. I choose two evaluation metrics: Mean Absolute Error (MAE) and Root Mean Square Error (RMSE), which are the most popular accuracy measures in the literature of recommendation systems.
+I perform 5-fold cross validation in the experiments. In each fold, 80\% of the data are used as training data and the rest as test data. And Two evaluation metrics are chose: Mean Absolute Error (MAE) and Root Mean Square Error (RMSE), which are the most popular accuracy measures in the literature of recommendation systems.
 MAE is defined as
 \begin{equation}
 MAE = \frac{\sum_{(u,v) \in \mathcal{R}_{test}}{|R_{u,v} - \hat{R}_{u,v}|}}{|\mathcal{R}_{test}|},
@@ -41,8 +41,6 @@ In order to demonstrate the effectiveness of the proposed IDSR model, I compare 
 	\item \textbf{GlobalAVG}: it uses the average of the ratings of all the observed items as predictions.
 	\item \textbf{UserAVG}: it uses the average of ratings given by the user as his/her predictions.
 	\item \textbf{ItemAVG}: it uses the average of ratings received by the target item as its predictions.
-	%\item \textbf{UserKNN}: In this method, a set of similar users are firstly found, the predicted rating of this user on one item is calculated as weighted average of the similar users' ratings of the item.
-	%\item \textbf{ItemKNN}: The method is very similar to the \textbf{UserKNN}, just take the weighted average of the similar items' rating as the predicted rating of the item.
 	\item \textbf{NMF} this method is originally proposed in \cite{lee1999learning} for image analysis. However, it is widely used in collaborative filtering recently. It only uses user-item matrix for recommendation.
 	\item \textbf{PMF}: This is the basic matrix factorization approach propose in \cite{mnih2007probabilistic} , which does not take into account the social network.
 \end{itemize}
