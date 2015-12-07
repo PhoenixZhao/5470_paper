@@ -9,7 +9,7 @@ Firstly, the items are clustered into small groups, which are defined as \emph{d
 \subsection{Implicit Domain Inference}
 The sparsity and cold start are the two main challenges facing the current recommendation algorithms. To address these two problems, many researchers started to employ side information such as social connections between users and text information of items. Examples of the former one are the aforementioned social- or trust- based recommendation systems while the latter ones always occur in item-based collaborative filtering methods. For example, when predicting the rating of a movie, we can firstly find $n$ most similar movies based on the attribute of a movie, such as description, director and cast etc. Then the rating can be calculated as weighted average ratings of the $n$ most similar movies.
 
-In this work, the text information of items are utilized to cluster the items into small groups, namely domains. And the popular latent dirichlet allocation (LDA)\cite{blei2003latent} as our clustering model, which is an useful method to extract hidden topics, i.e. domains, from the text information. By tuning the parameters, a specific number of topics are learned from the texts of items. Then we get the domains needed to split the trust network between users. In the following, the two terms \textit{domains} and \textit{topics} are used interchangeably.
+In this work, the text information of items are utilized to cluster the items into small groups, namely $domains$. And the popular latent dirichlet allocation (LDA)\cite{blei2003latent} is chosen as our clustering model, which is an useful method to extract hidden topics, i.e. domains, from the text information. By tuning the parameters, a specific number of topics are learned from the text information of items. Then we get the domains needed to split the trust network between users. In the following, the two terms \textit{domains} and \textit{topics} are used interchangeably.
 
 \subsection{Domain-Specific Trust Network}
 Given the domains of items learned by LDA, we then construct the domain-specific trust network between users. The basic idea is that a user may only trust those who are similar to him/her in the specific domains. For example, the trust people concerning the Spielberg's Movies can differ significantly from those regarding romantic movies. On the other hand, the trust between users is also inferred by the method described in the third part. 
@@ -26,21 +26,21 @@ where $N_u^{(d)}$ denotes the number of rating that user $u$ has assigned to ite
 
 This is illustrated for a toy example in Figure 3.
 \begin{figure}[h]
-	\caption{Toy Example for trust network concerning different domains}
+	\caption{Toy Example for trust network in a specific domain $d$}
 	\includegraphics[width=.8\textwidth]{toy_example}
 \end{figure}
 
 \subsection{Trust Assignment}
 After we construct the domain-specific trust network, we need to infer the trust of a user $u$ in a user $v$ regrading one specific domain. The whole process is based on one assumption that \emph{we trust people who share the same preferences over items in corresponding domains.} And the similarity is computed by the popular Pearson Correlation Coefficient (PCC)\cite{breese1998empirical}, which is used to define the similarity between two users $u$ and $v$ based on the items they rated in common:
 \begin{equation}
-Sim(u, v) = \frac{\sum\limits_{j \in I(u) \cap I(v) }R_{uj} \centerdot R_{vj}}{\sqrt{\sum\limits_{j \in I(u) \cap I(v)}R_{uj}^2} \centerdot \sqrt{\sum\limits_{j \in I(u) \cap I(v)}R_{vj}^2}},
+Sim(u, v) = \frac{\sum\limits_{j \in I(u) \cap I(v) }(R_{uj} - \bar{R}_j) \centerdot (R_{vj} - \bar{R}_j)}{\sqrt{\sum\limits_{j \in I(u) \cap I(v)}(R_{uj} - \bar{R}_j)^2} \centerdot \sqrt{\sum\limits_{j \in I(u) \cap I(v)}(R_{vj} - \bar{R}_j)^2}},
 \end{equation}
 This formula takes the whole rating matrix into consideration. Therefore, in our domain-specific trust inferring algorithm, the similarity between two users $u$ and $v$ regarding the domain $d$ should be written as follows:
 \begin{equation}
-Sim^{(d)}(u, v) = \frac{\sum\limits_{j \in I^{(d)}(u) \cap I^{(d)}(v) }R_{uj} \centerdot R_{vj}}{\sqrt{\sum\limits_{j \in I^{(d)}(u) \cap I^{(d)}(v)}R_{uj}^2} \centerdot \sqrt{\sum\limits_{j \in I^{(d)}(u) \cap I^{(d)}(v)}R_{vj}^2}},
+Sim^{(d)}(u, v) = \frac{\sum\limits_{j \in I^{(d)}(u) \cap I^{(d)}(v) }(R_{uj} - \bar{R}_j \centerdot (R_{vj} - \bar{R}_j)}{\sqrt{\sum\limits_{j \in I^{(d)}(u) \cap I^{(d)}(v)}(R_{uj} - \bar{R}_j)^2} \centerdot \sqrt{\sum\limits_{j \in I^{(d)}(u) \cap I^{(d)}(v)}(R_{vj} - \bar{R}_j)^2}},
 \end{equation}
 
-Then we use a very heuristic method that maps the similarity to trust value, in which we just assign the similarity value to the trust. 
+Then we use a very heuristic method that maps the similarity to trust value, in which we just assign the similarity value to the trust. And we only choose k most similar persons as the trust set of a user regarding one domain, which means the trust value of the persons outside the range of k is set to $0$.
 
 \subsection{Model Training}
 According to two regularization methods in \cite{ma2011recommender}, we use the trust set users $T_u^{(d)}$of one user in a specific domain $d$ as regularization terms to integrate into the MF framework and we adopt the individual-based regularization method. The only difference is that we train the model for different domains.
@@ -63,12 +63,5 @@ Analogous to \cite{ma2011recommender} and \cite{yang2012circle}, the gradient de
 \end{aligned}
 \end{equation}
 
-\textcolor{red}{\textbf{double-check the correctness of the formulas}}
-\textcolor{red}{\textbf{introduce every variables regarding the dimensions and meanings.}}
-
 \subsection{Complexity Analysis}
 The computational cost of the model lies in mainly three aspects: clustering, evaluation of the objective function $\mathcal{L}$ and its gradients with respect to variables. Firstly, the clustering can be done offline, thus its computation cost can be regarded as constant. And speaking of the latter two aspects, due to the sparsity of matrices R and T, the complexity of evaluating the objective function $\mathcal{L}$ is $O(l|\Omega| + lmk|D|)$, where l is the dimension of user\-specific latent vector, $|\Omega|$ is the number of ratings in the original rating matrix, $m$ is the number of users, $|D|$ is the number of the domains, which can be defined when running the LDA model, and $k$ is the average number of trust people of one user in one domain. On the other hand, the complexity of evaluating the gradients with respect to $U$ and $V$ is  $O(l|\Omega| + lmk|D|)$ and $O(l|\Omega|)$, respectively. Therefore, the total computational complexity in one iteration is $O(l|\Omega| + lmk|D|)$, which indicates that the computational time of my model is linear with respect to the number of the observations in the rating and trust matrices, which are very sparse in reality. This complexity analysis shows that the proposed approach is very efficient and can scale to very large datasets.
-
-
-
-
