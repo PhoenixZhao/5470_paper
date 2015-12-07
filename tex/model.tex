@@ -3,25 +3,20 @@ In this section, the IDSR model is elaborated in detail. In general, it consists
 \begin{figure}[h]
 	\caption{The framework of IDSR}
 	\centering
-	\includegraphics[width=8cm]{framework}
+	\includegraphics[width=16cm]{framework}
 \end{figure}
-Firstly, the items are clustered into small groups, which is defined as \emph{domains}, according to their content information such as titles and tags of movies in MovieLens dataset. Then, based on an assumption that users will trust those who share similar interest with them in specific domains, the domain-specific trust sub-networks is constructed. Further, the trust value in different domains of a user is calculated. Finally, the objective function of the model is given and also trained by gradient descent methods.
+Firstly, the items are clustered into small groups, which are defined as \emph{domains}, according to their content information such as titles and genre of movies in the MovieLens dataset. Then, based on an assumption that users will trust those who share similar interest with them in specific domains, the domain-specific trust sub-networks is constructed. Further, the trust value in different domains of a user is calculated. Finally, the objective function of the model is given and also trained by the gradient descent method.
 \subsection{Implicit Domain Inference}
-The sparsity and cold start are the two main challenges facing the current recommendation algorithms. To address these two problems, many researchers started to employ side information such as social connections between users and text information of items. Examples of former one are the aforementioned social- or trust-based recommendation systems while the latter ones always occur in item-based collaborative filtering methods. \textcolor{red}{The example need considering: For example, similar items based on text similarity are found to calculate the recommendation results}
+The sparsity and cold start are the two main challenges facing the current recommendation algorithms. To address these two problems, many researchers started to employ side information such as social connections between users and text information of items. Examples of the former one are the aforementioned social- or trust- based recommendation systems while the latter ones always occur in item-based collaborative filtering methods. For example, when predicting the rating of a movie, we can firstly find $n$ most similar movies based on the attribute of a movie, such as description, director and cast etc. Then the rating can be calculated as weighted average ratings of the $n$ most similar movies.
 
-In this work, the text information of items are utilized to cluster the items into small groups, namely domains. I choose the popular latent dirichlet allocation (LDA)\cite{blei2003latent} as our clustering model, which is useful methods to extract hidden topics, i.e. domains, from rich text information. By tuning the parameters, a specific number of topics are learned from the texts of items. Then we get the domains needed to split the trust network between users.
-
-\textcolor{red}{\textbf{give examples about topics in Movielens and amazon data}}
-\textcolor{red}{\textbf{better to draw some pictures}}
-
-\textcolor{red}{\textbf{better to use more math symbols than text descriptions}}
+In this work, the text information of items are utilized to cluster the items into small groups, namely domains. And the popular latent dirichlet allocation (LDA)\cite{blei2003latent} as our clustering model, which is an useful method to extract hidden topics, i.e. domains, from the text information. By tuning the parameters, a specific number of topics are learned from the texts of items. Then we get the domains needed to split the trust network between users. In the following, the two terms \textit{domains} and \textit{topics} are used interchangeably.
 
 \subsection{Domain-Specific Trust Network}
-Given the domains of items learned by LDA, I then construct the domain-specific trust network between users.The basic idea is that a user may only trust those who are similar to him/her in the specific domains. For example, the trust people concerning the Spielberg's Movies can differ significantly from those regarding romantic movies.
+Given the domains of items learned by LDA, we then construct the domain-specific trust network between users. The basic idea is that a user may only trust those who are similar to him/her in the specific domains. For example, the trust people concerning the Spielberg's Movies can differ significantly from those regarding romantic movies. On the other hand, the trust between users is also inferred by the method described in the third part. 
 
-Therefore, I split the network $S$ of all implicit trust relationships inferred before into many domain-specific sub-networks $S^{(d)}$, each of which concerning a single domain $d$ of items. Very similar to the definition in \cite{yang2012circle}, I also give the domain-specific trust networks of users in the following.
+Therefore, the network $S$ of all implicit trust relationships inferred before are split into many domain-specific sub-networks $S^{(d)}$, each of which concerning a single domain $d$ of items. Very similar to the definition in \cite{yang2012circle}, the domain-specific trust networks of users is defined in the following.
 
-\textbf{Definition(Domain-Specific Trust network)}: \emph{Regarding each domain $d$, users $u$ and $v$ are not in the same sub-network of trust between them, if and only if the following two criterions are satisfied:
+\textbf{Definition(Domain-Specific Trust network)}: \emph{Regarding each domain $d$, users $u$ and $v$ are in the same sub-network of trust between them, if and only if the following two criterions are satisfied:
 	\begin{itemize}
 		\item $T_{u,v} > 0$ in the inferred trust network, and
 		\item $N_u^{(d)} > 0$ and $N_v^{(d)} > 0$ in the rating data, 
@@ -32,11 +27,8 @@ where $N_u^{(d)}$ denotes the number of rating that user $u$ has assigned to ite
 This is illustrated for a toy example in Figure 3.
 \begin{figure}[h]
 	\caption{Toy Example for trust network concerning different domains}
-	\centering
-	\includegraphics[width=8cm]{toy_example}
+	\includegraphics[width=.8\textwidth]{toy_example}
 \end{figure}
-
-\textcolor{red}{\textbf{The definition need to be adjusted, draw some pictures like the circle-based paper and must modify the elaboration in the beginning of this section}}
 
 \subsection{Trust Assignment}
 After we construct the domain-specific trust network, we need to infer the trust of a user $u$ in a user $v$ regrading one specific domain. The whole process is based on one assumption that \emph{we trust people who share the same preferences over items in corresponding domains.} And the similarity is computed by the popular Pearson Correlation Coefficient (PCC)\cite{breese1998empirical}, which is used to define the similarity between two users $u$ and $v$ based on the items they rated in common:
@@ -48,11 +40,7 @@ This formula takes the whole rating matrix into consideration. Therefore, in our
 Sim^{(d)}(u, v) = \frac{\sum\limits_{j \in I^{(d)}(u) \cap I^{(d)}(v) }R_{uj} \centerdot R_{vj}}{\sqrt{\sum\limits_{j \in I^{(d)}(u) \cap I^{(d)}(v)}R_{uj}^2} \centerdot \sqrt{\sum\limits_{j \in I^{(d)}(u) \cap I^{(d)}(v)}R_{vj}^2}},
 \end{equation}
 
-Then we use a very heuristic method that maps the similarity to trust value, in which we just assign the similarity value to the trust.
-\textcolor{red}{\textbf{assumption: similar users generate trust
-		domain-specific similarity 
-		pcc metric
-		trust assignment  $\rightarrow$ similar to circle-based}}
+Then we use a very heuristic method that maps the similarity to trust value, in which we just assign the similarity value to the trust. 
 
 \subsection{Model Training}
 According to two regularization methods in \cite{ma2011recommender}, we use the trust set users $T_u^{(d)}$of one user in a specific domain $d$ as regularization terms to integrate into the MF framework and we adopt the individual-based regularization method. The only difference is that we train the model for different domains.
